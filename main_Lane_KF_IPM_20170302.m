@@ -1,11 +1,11 @@
-%% 2017.03.02£º ¿ªÊ¼±àĞ´UKF¸ú×ÙÄ£¿é
+%% 2017.03.02ï¼š å¼€å§‹ç¼–å†™UKFè·Ÿè¸ªæ¨¡å—
 clc 
 clear all
 close all
 
-SHOW_IPM = 1; % ÏÔÊ¾IPMÍ¼
-%% Êı¾İµ¼Èë
-source_addr = 'F:/Êı¾İ/lane_KF/20170227_data';
+SHOW_IPM = 1; % æ˜¾ç¤ºIPMå›¾
+%% æ•°æ®å¯¼å…¥
+source_addr = 'F:/æ•°æ®/lane_KF/20170227_data';
 image_file_name = '/rec_20161009_092201';
 image_addr = [source_addr , image_file_name];
 
@@ -16,7 +16,7 @@ lane_coeff_addr = [source_addr, '/imu_kf_test_data.txt'];
 gsensor_addr = [source_addr, '/log-gsensor.ini'];
 gsensor_data = load(gsensor_addr)';
 data_gensor_raw = [gsensor_data(2, :); gsensor_data(3:8, :)]; 
-% imuÊı¾İ
+% imuæ•°æ®
 w_drift = [ 0.0095873, -0.02130, 0.015978]';
 data_imu = fun_imu_data_trans( data_gensor_raw );
 data_gyro = data_imu(5:7, :) - w_drift;
@@ -24,23 +24,23 @@ data_gyro = data_imu(5:7, :) - w_drift;
 fid_log = fopen(log_addr,'r');
 fid_lan_coeff = fopen(lane_coeff_addr,'r');
 
-% ĞèÒª½øĞĞipmÏÔÊ¾µÄimageÎÄ¼ş¼ĞÃû
+% éœ€è¦è¿›è¡Œipmæ˜¾ç¤ºçš„imageæ–‡ä»¶å¤¹å
 ipm_image_file_name = 'rec_20161009_092201';
-% 4240 ¿ªÊ¼¿Õ¿õÂ·¶ÎµÄ±äµÀ
-ipm_index = 1960; %4240; %1305; % ´ÓÄÄÒ»Ö¡Í¼Æ¬¿ªÊ¼ipm
-ipm_step = 3; % ²½³¤
+% 4240 å¼€å§‹ç©ºæ—·è·¯æ®µçš„å˜é“
+ipm_index = 1960; %4240; %1305; % ä»å“ªä¸€å¸§å›¾ç‰‡å¼€å§‹ipm
+ipm_step = 3; % æ­¥é•¿
 
 
-%% ³õÊ¼»¯²ÎÊı
+%% åˆå§‹åŒ–å‚æ•°
 camera_parameter.n = 1280; % u (width)
 camera_parameter.m= 720; % v (height)
-camera_parameter.yaw = -1.74688*pi/180; % (ÎÒ¶¨ÒåµÄÊÇNE,yawÓÒÎªÕı£¬³µµÀÄÄ±ß¶¨Òå×óÎªÕı)
-camera_parameter.pitch = -0.824437*pi/180; % ±ê¶¨³öÀ´µÄ½Ç¶È¸úÕâÊ¹ÓÃµÄÊÇÏà·´µÄ
-camera_parameter.roll = 0; % Ë®Æ½Çã½Ç
+camera_parameter.yaw = -1.74688*pi/180; % (æˆ‘å®šä¹‰çš„æ˜¯NE,yawå³ä¸ºæ­£ï¼Œè½¦é“å“ªè¾¹å®šä¹‰å·¦ä¸ºæ­£)
+camera_parameter.pitch = -0.824437*pi/180; % æ ‡å®šå‡ºæ¥çš„è§’åº¦è·Ÿè¿™ä½¿ç”¨çš„æ˜¯ç›¸åçš„
+camera_parameter.roll = 0; % æ°´å¹³å€¾è§’
 camera_parameter.h = 1.22; %1.2; % Distance camera was above the ground (meters)
-camera_parameter.dl = 0; % ºáÏòÆ«ÒÆ ÏòÓÒÎªÕı
+camera_parameter.dl = 0; % æ¨ªå‘åç§» å‘å³ä¸ºæ­£
 camera_parameter.d = 0;
-camera_parameter.Pc =  [camera_parameter.dl 0 -camera_parameter.h]'; % µØÀí×ø±êÏµÏÂÏà»úÖĞĞÄ×ø±êµã  ;
+camera_parameter.Pc =  [camera_parameter.dl 0 -camera_parameter.h]'; % åœ°ç†åæ ‡ç³»ä¸‹ç›¸æœºä¸­å¿ƒåæ ‡ç‚¹  ;
 fx = 1423.51504;
 fy = 1424.32153;
 cx = 660.36155;
@@ -48,32 +48,32 @@ cy = 375.73916;
 camera_parameter.M1 = [ fx  0 cx;  
                         0  fy cy;  
                         0  0  1 ];
-% ¸©ÊÓÍ¼ ²ÎÊı
-camera_parameter.x_min = 1; % ÉãÏñÍ·pitchÏòÉÏ£¬µ¼ÖÂ½ü¾àÀë¿´²»¼û¡£
-camera_parameter.x_max = 70; % ×İÏò
+% ä¿¯è§†å›¾ å‚æ•°
+camera_parameter.x_min = 1; % æ‘„åƒå¤´pitchå‘ä¸Šï¼Œå¯¼è‡´è¿‘è·ç¦»çœ‹ä¸è§ã€‚
+camera_parameter.x_max = 70; % çºµå‘
 camera_parameter.y_min = -5;
-camera_parameter.y_max = 5; % ºáÏò
+camera_parameter.y_max = 5; % æ¨ªå‘
 camera_parameter.H1 = 400;
-camera_parameter.W1 = 350;  %ĞèÒªÏÔÊ¾Í¼ÏñµÄ¸ßºÍ¿í
+camera_parameter.W1 = 350;  %éœ€è¦æ˜¾ç¤ºå›¾åƒçš„é«˜å’Œå®½
 camera_parameter.zoom = 50;
-% Æû³µ²ÎÊı
+% æ±½è½¦å‚æ•°
 car_parameter.L = 2.637;
-car_parameter.K_s2w = 0.0752;% ·½ÏòÅÌ×ª½Ç->Ç°ÂÖ×ª½Ç
+car_parameter.K_s2w = 0.0752;% æ–¹å‘ç›˜è½¬è§’->å‰è½®è½¬è§’
 
-%% KF ²ÎÊı ³õÊ¼»¯
+%% KF å‚æ•° åˆå§‹åŒ–
 % X:  [pxi, pyi]*12
 % G = [ T^2/2  0;
 %       T      0;
 %       0    T^2/2;
 %       0      T;];
-% Ä¿Ç°¶ÔÔ¶½üµãµÄ·½²î¶¼ÊÇÒ»ÖÂ¶Ô´ı£¬µ«ÊÇÊµ¼ÊÓ¦¸Ã¿¼ÂÇ½üµÄ·½²îĞ¡£¬Ô¶µÄ·½²î´ó 
+% ç›®å‰å¯¹è¿œè¿‘ç‚¹çš„æ–¹å·®éƒ½æ˜¯ä¸€è‡´å¯¹å¾…ï¼Œä½†æ˜¯å®é™…åº”è¯¥è€ƒè™‘è¿‘çš„æ–¹å·®å°ï¼Œè¿œçš„æ–¹å·®å¤§ 
 Q_var = 0.4;
 Q0 = diag([Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,... 
         Q_var,Q_var]);  
 % Q0 = diag([Q_var,Q_var,Q_var,Q_var,Q_var]);  
 % Q = G*q*G';
 
-R_var = 0.2;         % R·½Ïò¹Û²âÎó²î·½²î
+R_var = 0.2;         % Ræ–¹å‘è§‚æµ‹è¯¯å·®æ–¹å·®
 R0 = diag([R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,... 
         R_var,R_var]); 
 % R0 = diag([R_var,R_var,R_var,R_var,R_var]); 
@@ -83,39 +83,39 @@ P0 = diag([P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var
         P0_var,P0_var]);  
 % P0 = diag([P0_var,P0_var,P0_var,P0_var,P0_var]);  
     
-X0 = zeros(12,1);      % ×´Ì¬ÏòÁ¿³õÖµ(Õâ¸öµÃµØÌâ´Ê½øÈëÑ­»·ºóÔÙ¸³Öµ)  
+X0 = zeros(12,1);      % çŠ¶æ€å‘é‡åˆå€¼(è¿™ä¸ªå¾—åœ°é¢˜è¯è¿›å…¥å¾ªç¯åå†èµ‹å€¼)  
 
-alpha = 0.1; % sigmaµãÔÚx¾ùÖµ¸½½üµÄ·Ö²¼³Ì¶È [0.0001, 1]
-belta = 2; % xÕıÌ¬·Ö²¼Ê±£¬×îÓÅbeta = 2
+alpha = 0.1; % sigmaç‚¹åœ¨xå‡å€¼é™„è¿‘çš„åˆ†å¸ƒç¨‹åº¦ [0.0001, 1]
+belta = 2; % xæ­£æ€åˆ†å¸ƒæ—¶ï¼Œæœ€ä¼˜beta = 2
 kalpha = 0;
 
 is_first_run_UKF = 1; % 
 
-%% Ñ­»·¼ÆËã
+%% å¾ªç¯è®¡ç®—
 gyro_fliter = [0 0 0]';
 k_camera = 0;
 k_imu = 0;
-line_index_t = 0; % ÓÃÀ´µ÷ÊÔ£¬¿´µ±Ç°¶Áµ½µÚ¼¸ĞĞ
+line_index_t = 0; % ç”¨æ¥è°ƒè¯•ï¼Œçœ‹å½“å‰è¯»åˆ°ç¬¬å‡ è¡Œ
 
-% ¶ÔcoeffÏà¹Ø½á¹¹Ìå½øĞĞ³õÊ¼»¯
+% å¯¹coeffç›¸å…³ç»“æ„ä½“è¿›è¡Œåˆå§‹åŒ–
 lane_coeff_struct.index = 0;
 lane_coeff_struct.timestamp = 0;
 lane_coeff_struct.NUM = 0;
-% KF¼ÆËãÏà¹Ø±äÁ¿³õÊ¼»¯
-struct_gyro_d.data = [0, 0, 0]'; % ¼ÇÂ¼Á½Ö¡Ö®¼ä²ÉÑùµ½µÄimuÊı¾İ£¬ÓÃÓÚÇóÆ½¾ù
+% KFè®¡ç®—ç›¸å…³å˜é‡åˆå§‹åŒ–
+struct_gyro_d.data = [0, 0, 0]'; % è®°å½•ä¸¤å¸§ä¹‹é—´é‡‡æ ·åˆ°çš„imuæ•°æ®ï¼Œç”¨äºæ±‚å¹³å‡
 struct_gyro_d.counter = 0;
-struct_speed.data = 0; % ¼ÇÂ¼Á½Ö¡Ö®¼ä²ÉÑùµ½µÄËÙ¶ÈÊı¾İ£¬ÓÃÓÚÇóÆ½¾ù
-struct_speed.counter = 0; % ¼ÆÊı
-iamge_timestamp_pre = 0; % ÉÏÒ»Ö¡Í¼ÏñÀ´µÄÊ±¿Ì
-is_first_step_KF = 1; % ÊÇ·ñÊÇµÚÒ»´Î½øÈëKF
+struct_speed.data = 0; % è®°å½•ä¸¤å¸§ä¹‹é—´é‡‡æ ·åˆ°çš„é€Ÿåº¦æ•°æ®ï¼Œç”¨äºæ±‚å¹³å‡
+struct_speed.counter = 0; % è®¡æ•°
+iamge_timestamp_pre = 0; % ä¸Šä¸€å¸§å›¾åƒæ¥çš„æ—¶åˆ»
+is_first_step_KF = 1; % æ˜¯å¦æ˜¯ç¬¬ä¸€æ¬¡è¿›å…¥KF
 
 while ~feof(fid_lan_coeff)
     is_lane_coeff_index_ok = 0;
     while(~is_lane_coeff_index_ok)
-        % ¶ÁÈ¡lane coeffÊı¾İ
+        % è¯»å–lane coeffæ•°æ®
         lane_coeff_data = fgetl(fid_lan_coeff);
-        str_line_raw = regexp(lane_coeff_data,' ','split'); %ÒÔ¿Õ¸ñÎªÌØÕ÷·Ö¸î×Ö·û´®
-        % lane_coeff_struct½á¹¹Ìå
+        str_line_raw = regexp(lane_coeff_data,' ','split'); %ä»¥ç©ºæ ¼ä¸ºç‰¹å¾åˆ†å‰²å­—ç¬¦ä¸²
+        % lane_coeff_structç»“æ„ä½“
         lane_coeff_struct.index = str2num(str_line_raw{1,1});
         if(lane_coeff_struct.index == ipm_index)
             is_lane_coeff_index_ok = 1;
@@ -123,29 +123,29 @@ while ~feof(fid_lan_coeff)
         
         lane_coeff_struct.timestamp = str2num(str_line_raw{1,2})/1000; % s
         lane_coeff_struct.NUM = str2num(str_line_raw{1,3});
-        % Èç¹ûÊÇÃ»ÓĞ³µµÀÏßÁ¿²â£¬ÄÇÃ´ÏµÍ³Ö»½øĞĞ»ùÓÚIMUµÄpredict
+        % å¦‚æœæ˜¯æ²¡æœ‰è½¦é“çº¿é‡æµ‹ï¼Œé‚£ä¹ˆç³»ç»Ÿåªè¿›è¡ŒåŸºäºIMUçš„predict
         if lane_coeff_struct.NUM >0
             for i = 1:lane_coeff_struct.NUM
                 for j = 1:4
-                    % Êµ¼ÊÊ¹ÓÃcoeff×÷Îª¹Û²âÊäÈëµÄÊ±ºò£¬ÏÈÊı¾İ×ömatch,¿´ÊôÓÚÄÄ±ßµÄ³µµÀÏß
-                    % ³µÖ»¸ú×ÙÒÔ³µÖĞĞÄÎªÖáµÄ×óÓÒÁ½±ß³µµÀÏß£¨±äµÀÊ±ĞèÒª¸ú×ÙÈı¸ù³µµÀÏßÔÙÌÖÂÛ£©
+                    % å®é™…ä½¿ç”¨coeffä½œä¸ºè§‚æµ‹è¾“å…¥çš„æ—¶å€™ï¼Œå…ˆæ•°æ®åšmatch,çœ‹å±äºå“ªè¾¹çš„è½¦é“çº¿
+                    % è½¦åªè·Ÿè¸ªä»¥è½¦ä¸­å¿ƒä¸ºè½´çš„å·¦å³ä¸¤è¾¹è½¦é“çº¿ï¼ˆå˜é“æ—¶éœ€è¦è·Ÿè¸ªä¸‰æ ¹è½¦é“çº¿å†è®¨è®ºï¼‰
                     lane_coeff_struct.lane_coeff(i,j) = str2double(str_line_raw{1, 3+4*(i-1)+j});
                 end
             end       
         end
     end
 
- %%  ¶ÁÈ¡logÊı¾İ    
-    is_Lane_Camera_matched = 0; % ÊÓÆµµÄÎÄ¼şÃûºÍlogÖĞµÄframeÃû¶ÔÓ¦£¬À´Çø·ÖlogÖĞ²»Í¬µÄÊÓÆµ¶Î
+ %%  è¯»å–logæ•°æ®    
+    is_Lane_Camera_matched = 0; % è§†é¢‘çš„æ–‡ä»¶åå’Œlogä¸­çš„frameåå¯¹åº”ï¼Œæ¥åŒºåˆ†logä¸­ä¸åŒçš„è§†é¢‘æ®µ
     while ~is_Lane_Camera_matched && ~feof(fid_log)
         line_index_t = line_index_t+1;
-        % µ½ÎÄ¼şÄ©Î²¾ÍÍË³ö
+        % åˆ°æ–‡ä»¶æœ«å°¾å°±é€€å‡º
         if feof(fid_log)
            break;
         end
 
         lineData = fgetl(fid_log);
-        str_line_raw = regexp(lineData,' ','split'); %ÒÔ¿Õ¸ñÎªÌØÕ÷·Ö¸î×Ö·û´®
+        str_line_raw = regexp(lineData,' ','split'); %ä»¥ç©ºæ ¼ä¸ºç‰¹å¾åˆ†å‰²å­—ç¬¦ä¸²
         time_s = str2num(str_line_raw{1,1});
         time_us = str2num(str_line_raw{1,2});
         time = time_s + time_us *1e-6;
@@ -160,7 +160,7 @@ while ~feof(fid_lan_coeff)
             data_imu = fun_imu_data_trans( data_gensor_raw );
             gyro_new = data_imu(5:7) - w_drift;
             gyro_fliter = funLowpassFilterVector3f( gyro_fliter, gyro_new, 0.01, 10 );
-            % ¼ÇÂ¼Á½Ö¡¼ÆËãµÄÍ¼Æ¬Ö®¼äµÄËùÓĞÊı¾İ
+            % è®°å½•ä¸¤å¸§è®¡ç®—çš„å›¾ç‰‡ä¹‹é—´çš„æ‰€æœ‰æ•°æ®
             struct_gyro_d.data = struct_gyro_d.data + gyro_fliter;
             struct_gyro_d.counter =  struct_gyro_d.counter + 1;
         % speed
@@ -170,22 +170,22 @@ while ~feof(fid_lan_coeff)
             struct_speed.counter =  struct_speed.counter + 1;
         % camera
         elseif strcmp(str_line_data_flag, 'cam_frame')                              
-            % »ñÈ¡Êı¾İ
+            % è·å–æ•°æ®
             t_s = str2num(str_line_raw{1, 1});
             t_us = str2num(str_line_raw{1, 2});
             image_timestamp = t_s + t_us*1e-6;
-            mp4_file_name_log = str_line_raw{1, 4}; % mp4ÎÄ¼şÂ·¾¶
+            mp4_file_name_log = str_line_raw{1, 4}; % mp4æ–‡ä»¶è·¯å¾„
             length_tmp = length(mp4_file_name_log);
             mp4_file_name_log = mp4_file_name_log(length_tmp-22 : length_tmp-4); 
             
             image_index_str = str_line_raw{1, 5};
-            image_index_num = str2num(image_index_str) + 1; % logÖĞÍ¼Ïñindex±àºÅÊÇ´Ó0¿ªÊ¼
+            image_index_num = str2num(image_index_str) + 1; % logä¸­å›¾åƒindexç¼–å·æ˜¯ä»0å¼€å§‹
 
-             % ±È¶Ôµ±Ç°Í¼ÏñµÄÊ±¼ä´Á
+             % æ¯”å¯¹å½“å‰å›¾åƒçš„æ—¶é—´æˆ³
             if SHOW_IPM
                 if strcmp(mp4_file_name_log, ipm_image_file_name) && ipm_index == image_index_num                       
-              %%  Ö´ĞĞKF¼ÆËã
-                %% 1. ¼ÆËãÊäÈëÁ¿ gyro_d_average, speed_average, dt_iamge
+              %%  æ‰§è¡ŒKFè®¡ç®—
+                %% 1. è®¡ç®—è¾“å…¥é‡ gyro_d_average, speed_average, dt_iamge
                     if struct_gyro_d.counter > 0
                         gyro_d_average = struct_gyro_d.data/struct_gyro_d.counter;
                     else
@@ -205,17 +205,17 @@ while ~feof(fid_lan_coeff)
                     dt_iamge = image_timestamp - iamge_timestamp_pre;
                     iamge_timestamp_pre = image_timestamp;
                     
-                    % ÊäÈëÊı¾İÇåÁã
+                    % è¾“å…¥æ•°æ®æ¸…é›¶
                     struct_gyro_d.data = 0;
                     struct_gyro_d.counter = 0;
                     struct_speed.data = 0;
                     struct_speed.counter = 0;
                     
-                 %% 2. ³µµÀÏß²ÉÑù 
-                    % ²½³¤£ºdL = 5m Ä¿Ç°ÓĞĞ§¹Û²â¾àÀëÉèÖÃÎª55m,ËùÒÔÃ¿Ìõ³µµÀÏß´Ë²ÉÑùºóÊÇ[xi; yi]*12
-                    % ×÷ÎªÒ»¸öÁĞÏòÁ¿12*1(ÒòÎªXÊÇ¹Ì¶¨²½³¤£¬ËùÒÔxµÄ×´Ì¬±äÁ¿¾Í²»ĞèÒªÔÙÀïÃæ¹À¼ÆÁË)
+                 %% 2. è½¦é“çº¿é‡‡æ · 
+                    % æ­¥é•¿ï¼šdL = 5m ç›®å‰æœ‰æ•ˆè§‚æµ‹è·ç¦»è®¾ç½®ä¸º55m,æ‰€ä»¥æ¯æ¡è½¦é“çº¿æ­¤é‡‡æ ·åæ˜¯[xi; yi]*12
+                    % ä½œä¸ºä¸€ä¸ªåˆ—å‘é‡12*1(å› ä¸ºXæ˜¯å›ºå®šæ­¥é•¿ï¼Œæ‰€ä»¥xçš„çŠ¶æ€å˜é‡å°±ä¸éœ€è¦å†é‡Œé¢ä¼°è®¡äº†)
                     dL = 5;
-                    lane_length = 55; % ³µµÀÏß³¤¶È
+                    lane_length = 55; % è½¦é“çº¿é•¿åº¦
                     if lane_coeff_struct.NUM > 0
                         for i = 1:lane_coeff_struct.NUM
                            lane_sample_points.lane(i) = fun_lane_sample( lane_coeff_struct.lane_coeff(i,:), dL, lane_length );                           
@@ -227,11 +227,11 @@ while ~feof(fid_lan_coeff)
                         X_vector_step(i,1) = dL*(i-1);
                     end
                     
-                 %% 3.UKF ÏÖÔÚÏÈÖ»×öÒ»Ìõ³µµÀÏßµÄ¸ú×Ù£¨×ó³µµÀÏß£©
-                    % 1) Á¿²â
-                    % Ê×ÏÈÑ°ÕÒ³õÊ¼»¯Ê±ºòµÄ×ó³µµÀÏß
+                 %% 3.UKF ç°åœ¨å…ˆåªåšä¸€æ¡è½¦é“çº¿çš„è·Ÿè¸ªï¼ˆå·¦è½¦é“çº¿ï¼‰
+                    % 1) é‡æµ‹
+                    % é¦–å…ˆå¯»æ‰¾åˆå§‹åŒ–æ—¶å€™çš„å·¦è½¦é“çº¿
                     for i = 1:lane_coeff_struct.NUM
-                        lane_offset(i) = lane_sample_points.lane(i).point(1, 1); % È¡³öËùÓĞlaneµÄoffset
+                        lane_offset(i) = lane_sample_points.lane(i).point(1, 1); % å–å‡ºæ‰€æœ‰laneçš„offset
                     end
 
                     max_offset = max(abs(lane_offset));
@@ -245,7 +245,7 @@ while ~feof(fid_lan_coeff)
                         end
                     end
                     
-                    % ±äÁ¿³õÊ¼»¯
+                    % å˜é‡åˆå§‹åŒ–
                     if(is_first_run_UKF && lane_coeff_struct.NUM>=2)                        
                         X0 = X0_left;
                         xEst = X0;
@@ -257,11 +257,11 @@ while ~feof(fid_lan_coeff)
                         d_pitch = 0;
                         is_first_run_UKF = 0;
                     else       
-                        % ÂË²¨
+                        % æ»¤æ³¢
                         u = [speed_average*dt_iamge, gyro_d_average(3)*dt_iamge]';
                         z = X0_left;
                         [xEst, Pk, Xk_predict] = Fukf(xEst, Pk, z, u, Q, R, alpha, belta, kalpha, dt_iamge,'ffun','hfun');
-                        % ´òÓ¡µ÷ÊÔ
+                        % æ‰“å°è°ƒè¯•
                         d_pitch = gyro_d_average(2)*dt_iamge*180/pi
                         d_yaw = gyro_d_average(3)*dt_iamge*180/pi
                     end
@@ -269,44 +269,44 @@ while ~feof(fid_lan_coeff)
                     XY_est = [X_vector_step';xEst'];  % [x ;y]*12
                     
                      
-                  %% Í¼Æ¬ IPM      
+                  %% å›¾ç‰‡ IPM      
                     image_name = sprintf('/%s_%08d.jpg',ipm_image_file_name, ipm_index);
                     image_addr = [source_addr, image_file_name, image_name];
                     I_rgb = imread(image_addr);          
-                    % IPM±ä»»
+                    % IPMå˜æ¢
                     if(1)
-                        % ÒòÎªÇ°ºóÁ½Ö¡ÓĞdpitch  ³¢ÊÔ»Ö¸´µ½Ç°ÃæÄÇÒ»Ö¡µÄ½Ç¶È
+                        % å› ä¸ºå‰åä¸¤å¸§æœ‰dpitch  å°è¯•æ¢å¤åˆ°å‰é¢é‚£ä¸€å¸§çš„è§’åº¦
                         camera_parameter_tmp = camera_parameter;
                         camera_parameter_tmp.pitch = camera_parameter.pitch + d_pitch/180*pi;
                         [ CC_rgb ] = fun_IPM( I_rgb, camera_parameter_tmp );   
-                        CC_rgb(:,:, 1) = medfilt2(CC_rgb(:,:, 1),[2,2]);% ÖĞÖµÂË²¨
-                        CC_rgb(:,:, 2) = medfilt2(CC_rgb(:,:, 2),[2,2]);% ÖĞÖµÂË²¨
-                        CC_rgb(:,:, 3) = medfilt2(CC_rgb(:,:, 3),[2,2]);% ÖĞÖµÂË²¨
+                        CC_rgb(:,:, 1) = medfilt2(CC_rgb(:,:, 1),[2,2]);% ä¸­å€¼æ»¤æ³¢
+                        CC_rgb(:,:, 2) = medfilt2(CC_rgb(:,:, 2),[2,2]);% ä¸­å€¼æ»¤æ³¢
+                        CC_rgb(:,:, 3) = medfilt2(CC_rgb(:,:, 3),[2,2]);% ä¸­å€¼æ»¤æ³¢
                     else
                         % gray
                         I_g = rgb2gray(I_rgb);
                         [ CC_rgb ] = fun_IPM( I_g, camera_parameter );   
-                        CC_rgb(:,:, 1) = medfilt2(CC_rgb(:,:, 1),[2,2]);% ÖĞÖµÂË²¨
+                        CC_rgb(:,:, 1) = medfilt2(CC_rgb(:,:, 1),[2,2]);% ä¸­å€¼æ»¤æ³¢
                     end
-                 %% »­Ïß
+                 %% ç”»çº¿
                     if (lane_coeff_struct.NUM >0)
-                        rgb_value_t = [200, 10, 10]; % ºì
+                        rgb_value_t = [200, 10, 10]; % çº¢
                         for i=1:lane_coeff_struct.NUM
 %                             [ CC_rgb ] = fun_plot_lane( lane_coeff_struct.lane_coeff(i,:), CC_rgb, rgb_value_t, camera_parameter);   
                         end
                     end
-                    % »­KF¹À¼ÆµÄpointµã
+                    % ç”»KFä¼°è®¡çš„pointç‚¹
                     rgb_value_t = [10, 10, 200];
-                    XY_z_pre = [X_vector_step';z_pre'];  % ÉÏÒ»Ö¡µÄÁ¿²âµã                    
+                    XY_z_pre = [X_vector_step';z_pre'];  % ä¸Šä¸€å¸§çš„é‡æµ‹ç‚¹                    
                     [ CC_rgb ] = fun_IPM_mark_points( XY_z_pre, CC_rgb, rgb_value_t, camera_parameter); 
                     z_pre = X0_left;
                     
-                    % Ô¤²âµÄµã
+                    % é¢„æµ‹çš„ç‚¹
                     rgb_value_t = [10, 200, 10];
                     XY_predict = [X_vector_step';Xk_predict'];  % [x ;y]*12
                     [ CC_rgb ] = fun_IPM_mark_points( XY_predict, CC_rgb, rgb_value_t, camera_parameter); 
                     
-                    % µ±Ç°¸ú×Ù³µµÀÏßµÄÁ¿²âµãX0_left
+                    % å½“å‰è·Ÿè¸ªè½¦é“çº¿çš„é‡æµ‹ç‚¹X0_left
                     rgb_value_t = [200, 10, 10];
                     XY_z = [X_vector_step';X0_left'];  % [x ;y]*12
                     
@@ -315,7 +315,7 @@ while ~feof(fid_lan_coeff)
                     
                     figure(1);
                     imshow(CC_rgb); 
-                    str_name = sprintf('frame %d ¸©ÊÓÍ¼', ipm_index);
+                    str_name = sprintf('frame %d ä¿¯è§†å›¾', ipm_index);
                     %text(3,4,str_name,'horiz','left','color','r')
                     title(str_name);                  
 

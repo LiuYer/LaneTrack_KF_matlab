@@ -8,7 +8,7 @@ function [ uv ] = fun_point_projection( xy_point, camera_parameter )
     h = camera_parameter.h;
     M1 = camera_parameter.M1;    
   
-    % Ïà»ú×ËÌ¬¾ØÕó
+    % ç›¸æœºå§¿æ€çŸ©é˜µ
     Ratt_roll = [1        0        0;
                  0   cos(roll)  sin(roll);
                  0   -sin(roll)  cos(roll);];
@@ -20,7 +20,7 @@ function [ uv ] = fun_point_projection( xy_point, camera_parameter )
                 -sin(yaw)  cos(yaw)  0;
                      0        0      1;];
     Ratt = Ratt_roll*Ratt_pitch*Ratt_yaw;     
-    Rc12c = [0 1 0;% Ïà»ú-Í¼Ïñ×ø±êÏµ  
+    Rc12c = [0 1 0;% ç›¸æœº-å›¾åƒåæ ‡ç³»  
              0 0 1;
              1 0 0];         
     I3 = diag([1,1,1]);
@@ -31,7 +31,7 @@ function [ uv ] = fun_point_projection( xy_point, camera_parameter )
     uv_tmp = R_w2i*[xy_point; h];
     uv = round(uv_tmp(1:2, 1)/uv_tmp(3));
     
-    % Èç¹ûuvÖĞ³öÏÖĞ¡ÓÚ0µÄ£¬ÔòÕû¶¨Îª[1 1]
+    % å¦‚æœuvä¸­å‡ºç°å°äº0çš„ï¼Œåˆ™æ•´å®šä¸º[1 1]
     if uv(1) <= 0 || uv(1)>1280 || uv(2) <= 0 || uv(2)>=720
         uv = [1, 1]';
     end

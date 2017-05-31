@@ -1,8 +1,8 @@
-% ¹Û²â×´Ì¬·½³Ì
-% x: ×´Ì¬±äÁ¿[x, vx, y, vy, z, vz]'  6*n
+% è§‚æµ‹çŠ¶æ€æ–¹ç¨‹
+% x: çŠ¶æ€å˜é‡[x, vx, y, vy, z, vz]'  6*n
 % z: 3*L
 function [z] = hfun(x)
-    L = length(x(1, :));  % 2n+1½øĞĞ½âËã
+    L = length(x(1, :));  % 2n+1è¿›è¡Œè§£ç®—
     H_vector = ones(1, (L-1)/2);
     H = diag(H_vector);
     z = H*x;

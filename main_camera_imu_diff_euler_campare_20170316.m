@@ -1,11 +1,11 @@
-%% 2017.03.16: ±È½ÏSVO¼ÆËãµÄºÍIMU»ı·ÖµÄÁ½Ö¡Ö®¼äµÄ±ä»¯
+%% 2017.03.16: æ¯”è¾ƒSVOè®¡ç®—çš„å’ŒIMUç§¯åˆ†çš„ä¸¤å¸§ä¹‹é—´çš„å˜åŒ–
 clc 
 clear all
 close all
 
-SHOW_IPM = 1; % ÏÔÊ¾IPMÍ¼
-%% Êı¾İµ¼Èë
-source_addr = 'F:/Êı¾İ/Camera+IMU time';
+SHOW_IPM = 1; % æ˜¾ç¤ºIPMå›¾
+%% æ•°æ®å¯¼å…¥
+source_addr = 'F:/æ•°æ®/Camera+IMU time';
 image_file_name = '/rec_20161009_092201';
 image_addr = [source_addr , image_file_name];
 
@@ -16,29 +16,29 @@ svo_att_addr = [source_addr, '/svo_att.txt'];
 log_addr = [source_addr, '/log.txt'];
 lane_coeff_addr = [source_addr, '/imu_kf_test_data.txt'];
 
-% imuÊı¾İ
+% imuæ•°æ®
 w_drift = [ 0.0095873, -0.02130, 0.015978]';
 
 fid_log = fopen(log_addr,'r');
 fid_svo_att = fopen(svo_att_addr,'r');
 
-% ĞèÒª½øĞĞipmÏÔÊ¾µÄimageÎÄ¼ş¼ĞÃû
+% éœ€è¦è¿›è¡Œipmæ˜¾ç¤ºçš„imageæ–‡ä»¶å¤¹å
 ipm_image_file_name = 'rec_20161117_095159';
-% 4240 ¿ªÊ¼¿Õ¿õÂ·¶ÎµÄ±äµÀ
-ipm_index = 1; %4240; %1305; % ´ÓÄÄÒ»Ö¡Í¼Æ¬¿ªÊ¼ipm
-ipm_step = 1; % ²½³¤
+% 4240 å¼€å§‹ç©ºæ—·è·¯æ®µçš„å˜é“
+ipm_index = 1; %4240; %1305; % ä»å“ªä¸€å¸§å›¾ç‰‡å¼€å§‹ipm
+ipm_step = 1; % æ­¥é•¿
 
 
-%% ³õÊ¼»¯²ÎÊı
+%% åˆå§‹åŒ–å‚æ•°
 camera_parameter.n = 1280; % u (width)
 camera_parameter.m= 720; % v (height)
-camera_parameter.yaw = -1.74688*pi/180; % (ÎÒ¶¨ÒåµÄÊÇNE,yawÓÒÎªÕı£¬³µµÀÄÄ±ß¶¨Òå×óÎªÕı)
-camera_parameter.pitch = -0.824437*pi/180; % ±ê¶¨³öÀ´µÄ½Ç¶È¸úÕâÊ¹ÓÃµÄÊÇÏà·´µÄ
-camera_parameter.roll = 0; % Ë®Æ½Çã½Ç
+camera_parameter.yaw = -1.74688*pi/180; % (æˆ‘å®šä¹‰çš„æ˜¯NE,yawå³ä¸ºæ­£ï¼Œè½¦é“å“ªè¾¹å®šä¹‰å·¦ä¸ºæ­£)
+camera_parameter.pitch = -0.824437*pi/180; % æ ‡å®šå‡ºæ¥çš„è§’åº¦è·Ÿè¿™ä½¿ç”¨çš„æ˜¯ç›¸åçš„
+camera_parameter.roll = 0; % æ°´å¹³å€¾è§’
 camera_parameter.h = 1.22; %1.2; % Distance camera was above the ground (meters)
-camera_parameter.dl = 0; % ºáÏòÆ«ÒÆ ÏòÓÒÎªÕı
+camera_parameter.dl = 0; % æ¨ªå‘åç§» å‘å³ä¸ºæ­£
 camera_parameter.d = 0;
-camera_parameter.Pc =  [camera_parameter.dl 0 -camera_parameter.h]'; % µØÀí×ø±êÏµÏÂÏà»úÖĞĞÄ×ø±êµã  ;
+camera_parameter.Pc =  [camera_parameter.dl 0 -camera_parameter.h]'; % åœ°ç†åæ ‡ç³»ä¸‹ç›¸æœºä¸­å¿ƒåæ ‡ç‚¹  ;
 fx = 1423.51504;
 fy = 1424.32153;
 cx = 660.36155;
@@ -46,32 +46,32 @@ cy = 375.73916;
 camera_parameter.M1 = [ fx  0 cx;  
                         0  fy cy;  
                         0  0  1 ];
-% ¸©ÊÓÍ¼ ²ÎÊı
-camera_parameter.x_min = 1; % ÉãÏñÍ·pitchÏòÉÏ£¬µ¼ÖÂ½ü¾àÀë¿´²»¼û¡£
-camera_parameter.x_max = 70; % ×İÏò
+% ä¿¯è§†å›¾ å‚æ•°
+camera_parameter.x_min = 1; % æ‘„åƒå¤´pitchå‘ä¸Šï¼Œå¯¼è‡´è¿‘è·ç¦»çœ‹ä¸è§ã€‚
+camera_parameter.x_max = 70; % çºµå‘
 camera_parameter.y_min = -5;
-camera_parameter.y_max = 5; % ºáÏò
+camera_parameter.y_max = 5; % æ¨ªå‘
 camera_parameter.H1 = 400;
-camera_parameter.W1 = 350;  %ĞèÒªÏÔÊ¾Í¼ÏñµÄ¸ßºÍ¿í
+camera_parameter.W1 = 350;  %éœ€è¦æ˜¾ç¤ºå›¾åƒçš„é«˜å’Œå®½
 camera_parameter.zoom = 50;
-% Æû³µ²ÎÊı
+% æ±½è½¦å‚æ•°
 car_parameter.L = 2.637;
-car_parameter.K_s2w = 0.0752;% ·½ÏòÅÌ×ª½Ç->Ç°ÂÖ×ª½Ç
+car_parameter.K_s2w = 0.0752;% æ–¹å‘ç›˜è½¬è§’->å‰è½®è½¬è§’
 
-%% KF ²ÎÊı ³õÊ¼»¯
+%% KF å‚æ•° åˆå§‹åŒ–
 % X:  [pxi, pyi]*12
 % G = [ T^2/2  0;
 %       T      0;
 %       0    T^2/2;
 %       0      T;];
-% Ä¿Ç°¶ÔÔ¶½üµãµÄ·½²î¶¼ÊÇÒ»ÖÂ¶Ô´ı£¬µ«ÊÇÊµ¼ÊÓ¦¸Ã¿¼ÂÇ½üµÄ·½²îĞ¡£¬Ô¶µÄ·½²î´ó 
+% ç›®å‰å¯¹è¿œè¿‘ç‚¹çš„æ–¹å·®éƒ½æ˜¯ä¸€è‡´å¯¹å¾…ï¼Œä½†æ˜¯å®é™…åº”è¯¥è€ƒè™‘è¿‘çš„æ–¹å·®å°ï¼Œè¿œçš„æ–¹å·®å¤§ 
 Q_var = 0.4;
 Q0 = diag([Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,... 
         Q_var,Q_var]);  
 % Q0 = diag([Q_var,Q_var,Q_var,Q_var,Q_var]);  
 % Q = G*q*G';
 
-R_var = 0.2;         % R·½Ïò¹Û²âÎó²î·½²î
+R_var = 0.2;         % Ræ–¹å‘è§‚æµ‹è¯¯å·®æ–¹å·®
 R0 = diag([R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,... 
         R_var,R_var]); 
 % R0 = diag([R_var,R_var,R_var,R_var,R_var]); 
@@ -81,49 +81,49 @@ P0 = diag([P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var
         P0_var,P0_var]);  
 % P0 = diag([P0_var,P0_var,P0_var,P0_var,P0_var]);  
     
-X0 = zeros(12,1);      % ×´Ì¬ÏòÁ¿³õÖµ(Õâ¸öµÃµØÌâ´Ê½øÈëÑ­»·ºóÔÙ¸³Öµ)  
+X0 = zeros(12,1);      % çŠ¶æ€å‘é‡åˆå€¼(è¿™ä¸ªå¾—åœ°é¢˜è¯è¿›å…¥å¾ªç¯åå†èµ‹å€¼)  
 
-alpha = 0.1; % sigmaµãÔÚx¾ùÖµ¸½½üµÄ·Ö²¼³Ì¶È [0.0001, 1]
-belta = 2; % xÕıÌ¬·Ö²¼Ê±£¬×îÓÅbeta = 2
+alpha = 0.1; % sigmaç‚¹åœ¨xå‡å€¼é™„è¿‘çš„åˆ†å¸ƒç¨‹åº¦ [0.0001, 1]
+belta = 2; % xæ­£æ€åˆ†å¸ƒæ—¶ï¼Œæœ€ä¼˜beta = 2
 kalpha = 0;
 
 is_first_run_UKF = 1; % 
 
-%% Ñ­»·¼ÆËã
+%% å¾ªç¯è®¡ç®—
 gyro_fliter = [0 0 0]';
 k_camera = 0;
 k_imu = 0;
-line_index_t = 0; % ÓÃÀ´µ÷ÊÔ£¬¿´µ±Ç°¶Áµ½µÚ¼¸ĞĞ
+line_index_t = 0; % ç”¨æ¥è°ƒè¯•ï¼Œçœ‹å½“å‰è¯»åˆ°ç¬¬å‡ è¡Œ
 
-% ¶ÔcoeffÏà¹Ø½á¹¹Ìå½øĞĞ³õÊ¼»¯
+% å¯¹coeffç›¸å…³ç»“æ„ä½“è¿›è¡Œåˆå§‹åŒ–
 lane_coeff_struct.index = 0;
 lane_coeff_struct.timestamp = 0;
 lane_coeff_struct.NUM = 0;
-% KF¼ÆËãÏà¹Ø±äÁ¿³õÊ¼»¯
-struct_gyro_d.data = [0, 0, 0]'; % ¼ÇÂ¼Á½Ö¡Ö®¼ä²ÉÑùµ½µÄimuÊı¾İ£¬ÓÃÓÚÇóÆ½¾ù
+% KFè®¡ç®—ç›¸å…³å˜é‡åˆå§‹åŒ–
+struct_gyro_d.data = [0, 0, 0]'; % è®°å½•ä¸¤å¸§ä¹‹é—´é‡‡æ ·åˆ°çš„imuæ•°æ®ï¼Œç”¨äºæ±‚å¹³å‡
 struct_gyro_d.counter = 0;
-struct_speed.data = 0; % ¼ÇÂ¼Á½Ö¡Ö®¼ä²ÉÑùµ½µÄËÙ¶ÈÊı¾İ£¬ÓÃÓÚÇóÆ½¾ù
-struct_speed.counter = 0; % ¼ÆÊı
-iamge_timestamp_pre = 0; % ÉÏÒ»Ö¡Í¼ÏñÀ´µÄÊ±¿Ì
-is_first_step_KF = 1; % ÊÇ·ñÊÇµÚÒ»´Î½øÈëKF
-% ¼ÆËãsvo×ËÌ¬
+struct_speed.data = 0; % è®°å½•ä¸¤å¸§ä¹‹é—´é‡‡æ ·åˆ°çš„é€Ÿåº¦æ•°æ®ï¼Œç”¨äºæ±‚å¹³å‡
+struct_speed.counter = 0; % è®¡æ•°
+iamge_timestamp_pre = 0; % ä¸Šä¸€å¸§å›¾åƒæ¥çš„æ—¶åˆ»
+is_first_step_KF = 1; % æ˜¯å¦æ˜¯ç¬¬ä¸€æ¬¡è¿›å…¥KF
+% è®¡ç®—svoå§¿æ€
 svo_att_index = 0;
 Rbn_pre = diag([1 1 1]);
 
 save_index = 0;
 
 while (1)
- %%  ¶ÁÈ¡logÊı¾İ    
-    is_Lane_Camera_matched = 0; % ÊÓÆµµÄÎÄ¼şÃûºÍlogÖĞµÄframeÃû¶ÔÓ¦£¬À´Çø·ÖlogÖĞ²»Í¬µÄÊÓÆµ¶Î
+ %%  è¯»å–logæ•°æ®    
+    is_Lane_Camera_matched = 0; % è§†é¢‘çš„æ–‡ä»¶åå’Œlogä¸­çš„frameåå¯¹åº”ï¼Œæ¥åŒºåˆ†logä¸­ä¸åŒçš„è§†é¢‘æ®µ
     while ~is_Lane_Camera_matched && ~feof(fid_log)
         line_index_t = line_index_t+1;
-        % µ½ÎÄ¼şÄ©Î²¾ÍÍË³ö
+        % åˆ°æ–‡ä»¶æœ«å°¾å°±é€€å‡º
         if feof(fid_log)
            break;
         end
 
         lineData = fgetl(fid_log);
-        str_line_raw = regexp(lineData,' ','split'); %ÒÔ¿Õ¸ñÎªÌØÕ÷·Ö¸î×Ö·û´®
+        str_line_raw = regexp(lineData,' ','split'); %ä»¥ç©ºæ ¼ä¸ºç‰¹å¾åˆ†å‰²å­—ç¬¦ä¸²
         time_s = str2num(str_line_raw{1,1});
         time_us = str2num(str_line_raw{1,2});
         time = time_s + time_us *1e-6;
@@ -138,7 +138,7 @@ while (1)
             data_imu = fun_imu_data_trans( data_gensor_raw );
             gyro_new = data_imu(5:7) - w_drift;
             gyro_fliter = funLowpassFilterVector3f( gyro_fliter, gyro_new, 0.01, 10 );
-            % ¼ÇÂ¼Á½Ö¡¼ÆËãµÄÍ¼Æ¬Ö®¼äµÄËùÓĞÊı¾İ
+            % è®°å½•ä¸¤å¸§è®¡ç®—çš„å›¾ç‰‡ä¹‹é—´çš„æ‰€æœ‰æ•°æ®
             struct_gyro_d.data = struct_gyro_d.data + gyro_fliter;
             struct_gyro_d.counter =  struct_gyro_d.counter + 1;
         % speed
@@ -148,21 +148,21 @@ while (1)
             struct_speed.counter =  struct_speed.counter + 1;
         % camera
         elseif strcmp(str_line_data_flag, 'cam_frame')                              
-            % »ñÈ¡Êı¾İ
+            % è·å–æ•°æ®
             t_s = str2num(str_line_raw{1, 1});
             t_us = str2num(str_line_raw{1, 2});
             image_timestamp = t_s + t_us*1e-6;
-            mp4_file_name_log = str_line_raw{1, 4}; % mp4ÎÄ¼şÂ·¾¶
+            mp4_file_name_log = str_line_raw{1, 4}; % mp4æ–‡ä»¶è·¯å¾„
             length_tmp = length(mp4_file_name_log);
             mp4_file_name_log = mp4_file_name_log(length_tmp-22 : length_tmp-4); 
             
             image_index_str = str_line_raw{1, 5};
-            image_index_num = str2num(image_index_str) + 1; % logÖĞÍ¼Ïñindex±àºÅÊÇ´Ó0¿ªÊ¼
+            image_index_num = str2num(image_index_str) + 1; % logä¸­å›¾åƒindexç¼–å·æ˜¯ä»0å¼€å§‹
             
-           %% ¶ÁÒ»×ésvoÊı¾İ
+           %% è¯»ä¸€ç»„svoæ•°æ®
             while svo_att_index <= image_index_num && ~feof(fid_svo_att)
                 lineData = fgetl(fid_svo_att);
-                str_line_raw = regexp(lineData,' ','split'); %ÒÔ¿Õ¸ñÎªÌØÕ÷·Ö¸î×Ö·û´®
+                str_line_raw = regexp(lineData,' ','split'); %ä»¥ç©ºæ ¼ä¸ºç‰¹å¾åˆ†å‰²å­—ç¬¦ä¸²
                 svo_att_index = str2num(str_line_raw{1,1})+1;
                 if(svo_att_index == svo_att_index)
                     % 
@@ -174,10 +174,10 @@ while (1)
                 end
                 
             end
-             % ±È¶Ôµ±Ç°Í¼ÏñµÄÊ±¼ä´Á
+             % æ¯”å¯¹å½“å‰å›¾åƒçš„æ—¶é—´æˆ³
             if SHOW_IPM
                 if strcmp(mp4_file_name_log, ipm_image_file_name) && ipm_index == image_index_num                       
-                %% 1. ¼ÆËãÊäÈëÁ¿ gyro_d_average, speed_average, dt_iamge
+                %% 1. è®¡ç®—è¾“å…¥é‡ gyro_d_average, speed_average, dt_iamge
                     if struct_gyro_d.counter > 0
                         gyro_d_average = struct_gyro_d.data/struct_gyro_d.counter;
                     else
@@ -191,21 +191,21 @@ while (1)
                     dt_iamge = image_timestamp - iamge_timestamp_pre;
                     iamge_timestamp_pre = image_timestamp;
                     
-                    % ¼ÆËãIMU diff_euler
+                    % è®¡ç®—IMU diff_euler
                     diff_euler_imu = gyro_d_average*dt_iamge*180/pi;
                     
-                    % ÊäÈëÊı¾İÇåÁã
+                    % è¾“å…¥æ•°æ®æ¸…é›¶
                     struct_gyro_d.data = 0;
                     struct_gyro_d.counter = 0;
                     struct_speed.data = 0;
                     struct_speed.counter = 0;
                     
-                  %% ¼ÆËãsvoÏà¶Ô×ËÌ¬
+                  %% è®¡ç®—svoç›¸å¯¹å§¿æ€
                     diff_R = Rbn_pre'*Rbn;                    
-                    Rbn_pre = Rbn;% ¸üĞÂÊı¾İ
+                    Rbn_pre = Rbn;% æ›´æ–°æ•°æ®
                     diff_euler = funRnb2Euler( diff_R );
                     
-                  %% ±£´æÊı¾İ
+                  %% ä¿å­˜æ•°æ®
                     save_index = save_index + 1;
                     save_svo_diff_euler(:, save_index) = [image_timestamp; diff_euler];
                     save_diff_euler_imu(:, save_index) = [image_timestamp; diff_euler_imu];

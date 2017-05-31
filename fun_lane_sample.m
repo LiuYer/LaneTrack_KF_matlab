@@ -1,11 +1,11 @@
-%% ÊäÈë
-% lane_coeff: ³µµÀÏß²ÎÊı1*4
-% dL: ²ÉÑù²½³¤
-% lane_length: ³µµÀÏß³¤¶È
+%% è¾“å…¥
+% lane_coeff: è½¦é“çº¿å‚æ•°1*4
+% dL: é‡‡æ ·æ­¥é•¿
+% lane_length: è½¦é“çº¿é•¿åº¦
 
-%% Êä³ö
-% lane_sample_points.cunter ²ÉÑùµãÊıÁ¿
-% lane_sample_points.point µã×ø±ê N*1 ÁĞÏòÁ¿
+%% è¾“å‡º
+% lane_sample_points.cunter é‡‡æ ·ç‚¹æ•°é‡
+% lane_sample_points.point ç‚¹åæ ‡ N*1 åˆ—å‘é‡
 function [ lane_sample_points ] = fun_lane_sample( lane_coeff, dL, lane_length )
     c0 = lane_coeff(1,1);
     c1 = lane_coeff(1,2);
@@ -16,7 +16,7 @@ function [ lane_sample_points ] = fun_lane_sample( lane_coeff, dL, lane_length )
     for i = 1:lane_length/dL
         x = dL*i;
         y = c0 + c1*x + c2*x^2 + c3*x^3;   
-        lane_sample_points.point(i, 1) = y; % x¹Ì¶¨²½³¤²ÉÑù ¾Í²»ĞèÒª¾ÍĞĞ¸ú×ÙÁË
+        lane_sample_points.point(i, 1) = y; % xå›ºå®šæ­¥é•¿é‡‡æ · å°±ä¸éœ€è¦å°±è¡Œè·Ÿè¸ªäº†
 %         lane_sample_points.point(i*2, 1) = y;
         points_counter = points_counter + 1;
     end

@@ -1,6 +1,6 @@
 function [ Xsigma, Wm, Wc ] = mySigma( x, P, alpha, belta, ki)
 
-    n    = numel(x);  % 生成sigma点的数量
+    n    = numel(x);  % 鐢熸垚sigma鐐圭殑鏁伴噺
     lamuda = alpha^2*( n + ki ) - n;
     c = n + lamuda;
     A = sqrt(c)*chol(P)';%R'*R=P     R=chol(P);

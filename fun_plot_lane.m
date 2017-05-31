@@ -13,7 +13,7 @@ function [ CC_rgb ] = fun_plot_lane( lane_coeff, CC_rgb, rgb_value_t, camera_par
     
     for x_line = x_min:0.3:x_max
         y_line = c0 + c1*x_line + c2*x_line^2 + c3*x_line^3;       
-        M = (-x_line + x_max)*H1/x_max; % ¼õÉÙÖØ¸´¼ÆËã
+        M = (-x_line + x_max)*H1/x_max; % å‡å°‘é‡å¤è®¡ç®—
         if x_line<x_max && x_line>x_min && y_line>y_min && y_line<y_max  
             N = (y_line + y_max)*W1/(2*y_max);
             u = round(N);

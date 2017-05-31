@@ -1,4 +1,4 @@
-% ×îĞÂĞŞ¸Ä ÓĞÉãÏñÍ·ËùÔÚÆ½ÃæÎª0Æ½Ãæ
+% æœ€æ–°ä¿®æ”¹ æœ‰æ‘„åƒå¤´æ‰€åœ¨å¹³é¢ä¸º0å¹³é¢
 function [ CC_rgb ] = fun_IPM( I_rgb, camera_parameter )
     x_min = camera_parameter.x_min;
     x_max = camera_parameter.x_max;
@@ -16,7 +16,7 @@ function [ CC_rgb ] = fun_IPM( I_rgb, camera_parameter )
     Pc = camera_parameter.Pc;
     M1 = camera_parameter.M1;    
   
-    % Ïà»ú×ËÌ¬¾ØÕó
+    % ç›¸æœºå§¿æ€çŸ©é˜µ
     Ratt_roll = [1        0        0;
                  0   cos(roll)  sin(roll);
                  0   -sin(roll)  cos(roll);];
@@ -28,26 +28,26 @@ function [ CC_rgb ] = fun_IPM( I_rgb, camera_parameter )
                 -sin(yaw)  cos(yaw)  0;
                      0        0      1;];
     Ratt = Ratt_roll*Ratt_pitch*Ratt_yaw;     
-    Rc12c = [0 1 0;% Ïà»ú-Í¼Ïñ×ø±êÏµ  
+    Rc12c = [0 1 0;% ç›¸æœº-å›¾åƒåæ ‡ç³»  
              0 0 1;
              1 0 0];         
     I3 = diag([1,1,1]);
     
-    % Ïà»úÎ»ÖÃµÄÆ«ÒÆ
+    % ç›¸æœºä½ç½®çš„åç§»
     
 %     R_w2i =  M1*Rc12c*Ratt*[I3 -Pc];
     R_w2i =  M1*Rc12c*Ratt;
     pixel_step = 1; 
-    for M = 1:pixel_step:H1               %±ä»»Ö®ºóÂ·ÃæÍ¼ÏñH1*W1=400*600¸öÏñËØ£¬Â·Ãæ¿í¶ÈÎª7m£¬¸ß¶ÈÎª10m
+    for M = 1:pixel_step:H1               %å˜æ¢ä¹‹åè·¯é¢å›¾åƒH1*W1=400*600ä¸ªåƒç´ ï¼Œè·¯é¢å®½åº¦ä¸º7mï¼Œé«˜åº¦ä¸º10m
         x = -(M*x_max/H1 - x_max);
         for N=1:pixel_step:W1            
             y = N*2*y_max/W1 - y_max; 
             if x<x_max && x>x_min && y>y_min && y<y_max
-                % Í¶Ó°±ä»¯£¬Ïà»ú³ÉÏñÄ£ĞÍ
+                % æŠ•å½±å˜åŒ–ï¼Œç›¸æœºæˆåƒæ¨¡å‹
 %                 Point_xyz = [x, y, 0, 1]';
                 Point_xyz = [x, y, Pc(3)]';
                 uv_tmp = R_w2i*Point_xyz;
-                uv_new = uv_tmp/(uv_tmp(3));% z·½ÏòÉî¶È¹éÒ»»¯
+                uv_new = uv_tmp/(uv_tmp(3));% zæ–¹å‘æ·±åº¦å½’ä¸€åŒ–
                 u = round(uv_new(1));
                 v = round(uv_new(2));                
                 if u>0.5 && v>0.5 && u<n && v<m

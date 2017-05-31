@@ -1,16 +1,16 @@
-%% 2017.03.16 ´ÓĞı×ª¾ØÕóÖĞÇóÈ¡×ËÌ¬
+%% 2017.03.16 ä»æ—‹è½¬çŸ©é˜µä¸­æ±‚å–å§¿æ€
 clc 
 clear all
 close all
 
-%% Êı¾İµ¼Èë
-source_addr = 'F:/Êı¾İ/Camera+IMU time';
+%% æ•°æ®å¯¼å…¥
+source_addr = 'F:/æ•°æ®/Camera+IMU time';
 att_file_name = '/att.txt';
 image_addr = [source_addr , att_file_name];
 
 att_R_data = load(image_addr)'; % 9*N
 
-%% ×ËÌ¬±ä»»
+%% å§¿æ€å˜æ¢
 R_pre = diag([1 1 1]);
 NUM = length(att_R_data);
 for i = 1:NUM
@@ -20,11 +20,11 @@ for i = 1:NUM
     euler = funRnb2Euler( diff_R );
     save_diff_euler(:, i) = euler*180/pi;    
     
-    % ¸üĞÂÊı¾İ
+    % æ›´æ–°æ•°æ®
     R_pre = Rnb;
 end
 
-% ±£´æ¼ÆËã½á¹ûtxt
+% ä¿å­˜è®¡ç®—ç»“æœtxt
 svo_log_name = './svo_att.txt';
 fp = fopen(svo_log_name, 'wt');
 for i = 1:NUM

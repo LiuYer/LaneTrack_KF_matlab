@@ -9,7 +9,7 @@ function [ CC_rgb ] = fun_plot_curve( line_p, CC_rgb, rgb_value_t, camera_parame
           
     for x_line = x_min:0.1:x_max
         y_line = [x_line^2, x_line, 1]*line_p;            
-        M = (-x_line + x_max)*H1/x_max; % ¼õÉÙÖØ¸´¼ÆËã
+        M = (-x_line + x_max)*H1/x_max; % å‡å°‘é‡å¤è®¡ç®—
         if x_line<x_max && x_line>x_min && y_line>y_min && y_line<y_max  
             N = (y_line + y_max)*W1/(2*y_max);
             u = round(N);

@@ -1,5 +1,5 @@
 
-% Ğı×ªË³Ğò Z-Y-X:yaw-pitch-roll
+% æ—‹è½¬é¡ºåº Z-Y-X:yaw-pitch-roll
 function [ euler ] = funRnb2Euler( Cn2b )
 %     Q = Q/(sqrt(sum(Q.^2)));
 %     q0 = Q(1);

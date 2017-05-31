@@ -1,12 +1,12 @@
 clc
 clear all
 
-camera_data_addr = 'F:\Êı¾İ\Camera+IMU time\log-camera.ini';
+camera_data_addr = 'F:\æ•°æ®\Camera+IMU time\log-camera.ini';
 fid_log = fopen(camera_data_addr,'r');
 i_index = 0;
 while ~feof(fid_log)
     lineData = fgetl(fid_log);
-    str_line_raw = regexp(lineData,' ','split'); %ÒÔ¿Õ¸ñÎªÌØÕ÷·Ö¸î×Ö·û´®
+    str_line_raw = regexp(lineData,' ','split'); %ä»¥ç©ºæ ¼ä¸ºç‰¹å¾åˆ†å‰²å­—ç¬¦ä¸²
     time_s = str2num(str_line_raw{1,1});
     time_us = str2num(str_line_raw{1,2});
     time = time_s + time_us *1e-6;
@@ -26,7 +26,7 @@ for i = 2:NUM
     
 end
 mean_dt = mean(save_dt) %  0.033
-std_dt = std(save_dt)  % ¾Ö²¿ÊÇ ¡À0.005   ²î²»¶à15%µÄÎó²î£¬ËùÒÔ¿ÉÒÔ¿¼ÂÇÓÃ¹Ì¶¨Öµdt
+std_dt = std(save_dt)  % å±€éƒ¨æ˜¯ Â±0.005   å·®ä¸å¤š15%çš„è¯¯å·®ï¼Œæ‰€ä»¥å¯ä»¥è€ƒè™‘ç”¨å›ºå®šå€¼dt
 
 figure()
 plot(save_dt);

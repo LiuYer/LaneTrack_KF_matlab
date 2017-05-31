@@ -1,8 +1,8 @@
 function [ lane_coeff_est ] = fun_lane_KF( gyro_z_average, speed_average, dt_iamge, lane_coeff_measure )
-% lane track KF º¯Êı
-% 1. ³µµÀÏß²ÉÑù
+% lane track KF å‡½æ•°
+% 1. è½¦é“çº¿é‡‡æ ·
 
-% 2-1. ×´Ì¬µİÍÆ Xk_
+% 2-1. çŠ¶æ€é€’æ¨ Xk_
 
 
 % 2-2.

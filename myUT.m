@@ -1,6 +1,6 @@
 function [Ey, Y, dY, Py] = myUT( Xsigma, u, Wm, Wc, R, T, fun1)
     L = size(Xsigma, 2);%L  should equal 2n+1
-    n = size(Xsigma, 1);  %  行数
+    n = size(Xsigma, 1);  %  琛屾暟
     Ey = zeros(n, 1);
     Y = zeros(n, L);
 
@@ -12,10 +12,10 @@ function [Ey, Y, dY, Py] = myUT( Xsigma, u, Wm, Wc, R, T, fun1)
         Y(:, i) = y;
     end
     Ey = Y*Wm';
-    for k = 1 : L   % 计算效率比下文高
+    for k = 1 : L   % 璁＄畻鏁堢巼姣斾笅鏂囬珮
         dY (:, k) = Y(:, k) - Ey ;
     end
-    %dY = Y - Ey(:,ones(1, L));%actually y'dimension is n×1，but y is a constant ,so though y(:,ones(1,L))  to meet the dimension of Y
+    %dY = Y - Ey(:,ones(1, L));%actually y'dimension is n脳1锛宐ut y is a constant ,so though y(:,ones(1,L))  to meet the dimension of Y
     Py = dY*diag(Wc)*dY' + R;
     % Py = zeros(6,6);
     % for i = 1:L
