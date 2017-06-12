@@ -1,7 +1,7 @@
 % 系统状态方程
 % x: 状态变量[xi, yi]*12= 24*1
 function [Xk1] = ffun(Xk,Uk,T)
-    dL = 5;  % 车道线采样步长
+    dL = 2;  % 车道线采样步长
     dx = Uk(1);
     dfai = Uk(2);
     NUM = length(Xk);

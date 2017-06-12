@@ -1,4 +1,4 @@
-%Cb2n
+% Cb2n q0=w
 function [ Cb2n ] = funQ2Cb2n( Q )
     Q = Q/(sqrt(sum(Q.^2)));
     q0 = Q(1);

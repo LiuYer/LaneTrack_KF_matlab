@@ -12,14 +12,15 @@ function [ lane_sample_points ] = fun_lane_sample( lane_coeff, dL, lane_length )
     c2 = lane_coeff(1,3);
     c3 = lane_coeff(1,4);
     
-    points_counter = 0;
-    for i = 1:lane_length/dL
+    points_index = 0;
+    for i = 0:1:lane_length/dL
         x = dL*i;
         y = c0 + c1*x + c2*x^2 + c3*x^3;   
-        lane_sample_points.point(i, 1) = y; % x固定步长采样 就不需要就行跟踪了
+        points_index = points_index + 1;
+        lane_sample_points.point(points_index, 1) = y; % x固定步长采样 就不需要就行跟踪了
 %         lane_sample_points.point(i*2, 1) = y;
-        points_counter = points_counter + 1;
+        
     end
-    lane_sample_points.counter = points_counter;
+    lane_sample_points.counter = points_index;
 end
 

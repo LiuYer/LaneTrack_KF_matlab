@@ -1,4 +1,6 @@
 %% 2017.03.02： 开始编写UKF跟踪模块
+%% 2017.06.05 重新开始
+%% 2017.06.06 TODO: 看只跟踪交点和offset是否可以估计bias
 clc 
 clear all
 close all
@@ -9,15 +11,16 @@ source_addr = '/media/yj/Data4T/data/Lane/20170227_data';
 image_file_name = '/rec_20161009_092201';
 image_addr = [source_addr , image_file_name];
 
-% log_addr = [source_addr, '/log-4225.txt'];
-log_addr = [source_addr, '/log-1950.txt'];
+log_addr = [source_addr, '/log-wandao.txt'];
+% log_addr = [source_addr, '/log.txt'];
 lane_coeff_addr = [source_addr, '/imu_kf_test_data.txt'];
 
 gsensor_addr = [source_addr, '/log-gsensor.ini'];
 gsensor_data = load(gsensor_addr)';
 data_gensor_raw = [gsensor_data(2, :); gsensor_data(3:8, :)]; 
-% imu数据
-w_drift = [ 0.0095873, -0.02130, 0.015978]';
+
+%--------------------------- imu数据 ---------------------------
+w_drift = [ 0.009470 -0.020900 0.015947]'; % 0.015947
 data_imu = fun_imu_data_trans( data_gensor_raw );
 data_gyro = data_imu(5:7, :) - w_drift;
 
@@ -26,10 +29,13 @@ fid_lan_coeff = fopen(lane_coeff_addr,'r');
 
 % 需要进行ipm显示的image文件夹名
 ipm_image_file_name = 'rec_20161009_092201';
-% 4240 开始空旷路段的变道
-ipm_index = 1960; %4240; %1305; % 从哪一帧图片开始ipm
-ipm_step = 10; % 步长
+% ipm_index = 4240; % 开始空旷路段的变道
+ipm_index = 6100; % 弯道
 
+ipm_step = 3; % 步长
+dL = 2;
+lane_length = 50; % 车道线长度
+points_num = round(lane_length/dL) + 1;
 
 %% 初始化参数
 camera_parameter.n = 1280; % u (width)
@@ -51,8 +57,8 @@ camera_parameter.M1 = [ fx  0 cx;
 % 俯视图 参数
 camera_parameter.x_min = 1; % 摄像头pitch向上，导致近距离看不见。
 camera_parameter.x_max = 70; % 纵向
-camera_parameter.y_min = -5;
-camera_parameter.y_max = 5; % 横向
+camera_parameter.y_min = -7;
+camera_parameter.y_max = 7; % 横向
 camera_parameter.H1 = 400;
 camera_parameter.W1 = 350;  %需要显示图像的高和宽
 camera_parameter.zoom = 50;
@@ -68,22 +74,22 @@ car_parameter.K_s2w = 0.0752;% 方向盘转角->前轮转角
 %       0      T;];
 % 目前对远近点的方差都是一致对待，但是实际应该考虑近的方差小，远的方差大 
 Q_var = 0.4;
-Q0 = diag([Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,Q_var,... 
-        Q_var,Q_var]);  
+Q_var_vec = ones(1, points_num)*Q_var;
+Q0 = diag(Q_var_vec);  
 % Q0 = diag([Q_var,Q_var,Q_var,Q_var,Q_var]);  
 % Q = G*q*G';
 
 R_var = 0.2;         % R方向观测误差方差
-R0 = diag([R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,R_var,... 
-        R_var,R_var]); 
+R_var_vec = ones(1, points_num)*R_var;
+R0 = diag(R_var_vec); 
 % R0 = diag([R_var,R_var,R_var,R_var,R_var]); 
     
 P0_var = 1;
-P0 = diag([P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,P0_var,... 
-        P0_var,P0_var]);  
+P0_var_vec = ones(1, points_num)*P0_var;
+P0 = diag(P0_var_vec);  
 % P0 = diag([P0_var,P0_var,P0_var,P0_var,P0_var]);  
     
-X0 = zeros(12,1);      % 状态向量初值(这个得地题词进入循环后再赋值)  
+X0 = zeros(points_num,1);      % 状态向量初值(这个得地题词进入循环后再赋值)  
 
 alpha = 0.1; % sigma点在x均值附近的分布程度 [0.0001, 1]
 belta = 2; % x正态分布时，最优beta = 2
@@ -108,6 +114,9 @@ struct_speed.data = 0; % 记录两帧之间采样到的速度数据，用于求�
 struct_speed.counter = 0; % 计数
 iamge_timestamp_pre = 0; % 上一帧图像来的时刻
 is_first_step_KF = 1; % 是否是第一次进入KF
+
+is_new_lane = 0; % 是否是新的车道线
+lane_offset_left_pre = 0; % 上一时刻的left offset， 用于判断是否是新的左车道线量测
 
 while ~feof(fid_lan_coeff)
     is_lane_coeff_index_ok = 0;
@@ -203,6 +212,7 @@ while ~feof(fid_lan_coeff)
                         is_first_step_KF = 0;
                     end
                     dt_iamge = image_timestamp - iamge_timestamp_pre;
+%                     dt_iamge = 5*60/7734*ipm_step;
                     iamge_timestamp_pre = image_timestamp;
                     
                     % 输入数据清零
@@ -214,12 +224,11 @@ while ~feof(fid_lan_coeff)
                  %% 2. 车道线采样 
                     % 步长：dL = 5m 目前有效观测距离设置为55m,所以每条车道线此采样后是[xi; yi]*12
                     % 作为一个列向量12*1(因为X是固定步长，所以x的状态变量就不需要再里面估计了)
-                    dL = 5;
-                    lane_length = 55; % 车道线长度
+
                     if lane_coeff_struct.NUM > 0
                         for i = 1:lane_coeff_struct.NUM
-                            disp('lane coeff:')
-                            lane_coeff_struct.lane_coeff(i,:)
+%                             disp('lane coeff:')
+%                             lane_coeff_struct.lane_coeff(i,:)
                            lane_sample_points.lane(i) = fun_lane_sample( lane_coeff_struct.lane_coeff(i,:), dL, lane_length );                           
                         end
                     end
@@ -238,7 +247,7 @@ while ~feof(fid_lan_coeff)
 
                     max_offset = max(abs(lane_offset));
                     for i = 1: lane_coeff_struct.NUM
-                        if(abs(lane_offset(i)) ~= max_offset && abs(lane_offset(i))<4.5)
+                        if(abs(lane_offset(i))<4)
                             if(lane_offset(i) <= 0)
                                 X0_left = lane_sample_points.lane(i).point;
                             else
@@ -247,8 +256,15 @@ while ~feof(fid_lan_coeff)
                         end
                     end
                     
+                    % 判断是否是新的车道线
+                    d_offset_left = X0_left(1,1) - lane_offset_left_pre;
+                    if abs(d_offset_left) > 2
+                        is_new_lane = 1;
+                    end
+                    lane_offset_left_pre = X0_left(1,1);
+                    
                     % 变量初始化
-                    if(is_first_run_UKF && lane_coeff_struct.NUM>=2)                        
+                    if((is_first_run_UKF || is_new_lane == 1) )                        
                         X0 = X0_left;
                         xEst = X0;
                         z_pre = X0;
@@ -258,24 +274,29 @@ while ~feof(fid_lan_coeff)
                         R = R0;
                         d_pitch = 0;
                         is_first_run_UKF = 0;
+                        is_new_lane = 0;
                     else       
                         % 滤波
                         u = [speed_average*dt_iamge, gyro_d_average(3)*dt_iamge]';
                         z = X0_left;
                         [xEst, Pk, Xk_predict] = Fukf(xEst, Pk, z, u, Q, R, alpha, belta, kalpha, dt_iamge,'ffun','hfun');
                         % 打印调试
-                        dt_iamge
-                        d_pitch = gyro_d_average(2)*dt_iamge*180/pi
-                        d_yaw = gyro_d_average(3)*dt_iamge*180/pi
+%                         dt_iamge
+                        d_pitch = gyro_d_average(2)*dt_iamge*180/pi;
+                        d_yaw = gyro_d_average(3)*dt_iamge*180/pi;
                     end
                     
-                    XY_est = [X_vector_step';xEst'];  % [x ;y]*12
+                    XY_est = [X_vector_step'; xEst'];  % [x ;y]*12
                     
                      
                   %% 图片 IPM      
                     image_name = sprintf('/%s_%08d.jpg',ipm_image_file_name, ipm_index);
                     image_addr = [source_addr, image_file_name, image_name];
-                    I_rgb = imread(image_addr);          
+                    I_rgb = imread(image_addr);  
+                    
+%                     figure(2);
+%                     imshow(I_rgb); 
+                    
                     % IPM变换
                     if(1)
                         % 因为前后两帧有dpitch  尝试恢复到前面那一帧的角度
@@ -312,8 +333,7 @@ while ~feof(fid_lan_coeff)
                     % 红：当前跟踪车道线的量测点X0_left 
                     rgb_value_t = [200, 10, 10];
                     XY_z = [X_vector_step';X0_left'];  % [x ;y]*12
-                    [ CC_rgb ] = fun_IPM_mark_points( XY_z, CC_rgb, rgb_value_t, camera_parameter); 
-                    
+                    [ CC_rgb ] = fun_IPM_mark_points( XY_z, CC_rgb, rgb_value_t, camera_parameter);                    
                     
                     figure(1);
                     imshow(CC_rgb); 

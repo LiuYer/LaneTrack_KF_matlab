@@ -1,4 +1,4 @@
-%% 完成读取图片，IPM变化，并在IPM图上画车道线
+%% 完成读取图片，IPM变化，并在IPM图上画转弯半径
 clc 
 clear all
 close all
