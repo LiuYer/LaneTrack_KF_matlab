@@ -1,6 +1,6 @@
 
 % 旋转顺序 Z-Y-X:yaw-pitch-roll
-function [ euler ] = funRnb2Euler( Cn2b )
+function [ euler ] = funCn2b_to_Euler( Cn2b )
 %     Q = Q/(sqrt(sum(Q.^2)));
 %     q0 = Q(1);
 %     q1 = Q(2);

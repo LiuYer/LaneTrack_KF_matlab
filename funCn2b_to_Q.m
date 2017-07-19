@@ -1,6 +1,6 @@
 %Cb2n  q0=w
 % Q1 = [0.7123 -0.0077 0.01049 0.70175];
-function [ Q ] = funCb2n2Q( Cb2n)
+function [ Q ] = funCn2b_to_Q( Cb2n)
     T11 = Cb2n(1, 1);
     T12 = Cb2n(1, 2);
     T13 = Cb2n(1, 3);

@@ -1,4 +1,4 @@
-function [ CC_rgb ] = fun_IPM_mark_points( XY_points, CC_rgb, rgb_value_t, camera_parameter  )
+function [ CC_rgb ] = fun_IPM_mark_points( XY_points_t, CC_rgb, rgb_value_t, camera_parameter  )
     x_min = camera_parameter.x_min;
     x_max = camera_parameter.x_max;
     y_min = camera_parameter.y_min;
@@ -6,7 +6,9 @@ function [ CC_rgb ] = fun_IPM_mark_points( XY_points, CC_rgb, rgb_value_t, camer
     H1 = camera_parameter.H1;
     W1 = camera_parameter.W1;
     
-    NUM = length(XY_points);
+    XY_points = [XY_points_t(2, :);
+                 XY_points_t(1, :)]; 
+    [n, NUM] = size(XY_points);
     for i = 1:NUM
         x = XY_points(1, i);
         y = XY_points(2, i);
