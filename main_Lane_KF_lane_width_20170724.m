@@ -33,7 +33,7 @@ fid_lan_coeff = fopen(lane_coeff_addr,'r');
 
 % 需要进行ipm显示的image文件夹名
 ipm_image_file_name = 'rec_20161009_092201';
-ipm_index = 4850; % 开始空旷路段的变道
+ipm_index = 5000; % 4850; % 开始空旷路段的变道
 % ipm_index = 6190; % 弯道
 
 ipm_step = 3; % 步长
@@ -77,15 +77,18 @@ car_parameter.K_s2w = 0.0752;% 方向盘转角->前轮转角
 %       0    T^2/2;
 %       0      T;];
 % 目前对远近点的方差都是一致对待，但是实际应该考虑近的方差小，远的方差大 
+% X = [y vy ay fai C]
+% Z = [y]
+P0_l = diag([10, 4, 2 100/57.3 0.001]);  
+Q0_l = diag([5, 1, 1 40/57.3 0.0004]);  
+R0_l = diag([1]); 
 
-Q0 = diag([0.02, 0.02, 9/57.3]);  
-
-R0 = diag([0.01, 0.01, 9/57.3]);  
-
-P0 = diag([0.01, 0.01, 9/57.3]);  
-    
-X0_l = zeros(3,1);   % 状态向量初值(这个得地题词进入循环后再赋值)  
-X0_r = zeros(3,1);      
+P0_r = diag([10, 4, 2 100/57.3 0.001]);  
+Q0_r = diag([5, 1, 1 40/57.3 0.0004]);  
+R0_r = diag([1]); 
+ 
+X0_l = zeros(5, 1);   % 状态向量初值(这个得地题词进入循环后再赋值)  
+X0_r = zeros(5, 1);      
 
 alpha = 0.1; % sigma点在x均值附近的分布程度 [0.0001, 1]
 belta = 2; % x正态分布时，最优beta = 2
@@ -268,35 +271,43 @@ while ~feof(fid_lan_coeff)
                 new_x = a*new_y + b;
                 fai = atan(a);
                 lane_right_measure_new = [new_x, new_y, fai]';
+                
+                % for debug 
+                if ipm_index == 5243
+                    kk = 1;
+                end
 
                 % 变量初始化
-                if( is_first_run_UKF || is_new_lane == 1 )                        
-                    X0_l = lane_left_measure_new;
-                    xEst_l = X0_l;
-                    Xk_predict_l = X0_l;
+                if( is_first_run_UKF || is_new_lane == 1 )   
+                    lane_parameter_left = fun_get_lane_parameter( lane_left_measure );
+                    xEst_l = [lane_parameter_left(1), 0, 0, lane_parameter_left(2), lane_parameter_left(3)]';
+                    Xk_predict_l = xEst_l;
                     z_pre_l = lane_left_measure_new;
-                    Pk_l = P0;
-                    Q = Q0;
-                    R = R0;
-
-                    X0_r = lane_right_measure_new;
-                    xEst_r = X0_r;
+                    Pk_l = P0_l;
+                    Q_l = Q0_l;
+                    R_l = R0_l;
+                    
+                    lane_parameter_right = fun_get_lane_parameter( lane_right_measure );
+                    xEst_r = [lane_parameter_right(1), 0, 0, lane_parameter_right(2), lane_parameter_right(3)]';
+                    Xk_predict_r = xEst_r;
                     z_pre_r = lane_right_measure_new;
-                    Xk_predict_r = X0_r;
-                    Pk_r = P0;
+                    Pk_r = P0_r;
+                    Q_r = Q0_r;
+                    R_r = R0_r;
 
                     is_first_run_UKF = 0;
                     is_new_lane = 0;
                 else       
                     % 滤波
-                    u = [speed_average*dt_iamge, gyro_d_average(3)*dt_iamge]';
                     % left
-                    z_l = lane_left_measure_new;
-                    [xEst_l, Pk_l, Xk_predict_l, lamuda_l] = fun_KF_residual(xEst_l, Pk_l, u, z_l, Q, R);                                  
+                    u_l = [gyro_d_average(3)]';
+                    z_l = lane_left_measure';
+                    [xEst_l, Pk_l, Xk_predict_l, lamuda_l] = fun_KF_clothiod(xEst_l, Pk_l, u_l, z_l, Q_l, R_l, speed_average, dt_iamge);
 
                     % right
-                    z_r = lane_right_measure_new;
-                    [xEst_r, Pk_r, Xk_predict_r, lamuda_r] = fun_KF_residual(xEst_r, Pk_r, u, z_r, Q, R);
+                    u_r = [gyro_d_average(3)]';
+                    z_r = lane_right_measure';
+                    [xEst_r, Pk_r, Xk_predict_r, lamuda_r] = fun_KF_clothiod(xEst_r, Pk_r, u_r, z_r, Q_r, R_r, speed_average, dt_iamge);
 
                     % 保存数据
                     save_index = save_index + 1;
@@ -331,7 +342,7 @@ while ~feof(fid_lan_coeff)
 
                     % 绿：预测当前帧的车道线 
                     rgb_value_t = [10, 200, 10];
-                    lane_coeff = [Xk_predict_l(1), tan(Xk_predict_l(3)) 0 0]; % lane_left_measure
+                    lane_coeff = [Xk_predict_l(1), tan(Xk_predict_l(4)) 0 0]; % lane_left_measure
                     [ CC_rgb ] = fun_plot_lane( lane_coeff, 13, CC_rgb, rgb_value_t, camera_parameter);
 
                     % 红：当前跟踪车道线的量测点X0_left 
@@ -347,7 +358,8 @@ while ~feof(fid_lan_coeff)
 
                     % 绿：预测当前帧的车道线 
                     rgb_value_t = [10, 200, 10];
-                    lane_coeff = [Xk_predict_r(1), tan(Xk_predict_r(3)) 0 0]; % lane_left_measure
+%                     lane_coeff = [Xk_predict_r(1), tan(Xk_predict_r(3)) 0 0]; % lane_left_measure
+                     lane_coeff = [Xk_predict_r(1), tan(Xk_predict_r(4)) 0 0]; % lane_left_measure
                     [ CC_rgb ] = fun_plot_lane( lane_coeff, 13, CC_rgb, rgb_value_t, camera_parameter);
 
                     % 红：当前跟踪车道线的量测点

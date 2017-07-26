@@ -294,11 +294,11 @@ while ~feof(fid_lan_coeff)
                         u = [speed_average*dt_iamge, gyro_d_average(3)*dt_iamge]';
                         % left
                         z_l = lane_left_measure_new;
-                        [xEst_l, Pk_l, Xk_predict_l, lamuda_l] = fun_KF_resdiual(xEst_l, Pk_l, u, z_l, Q, R);
+                        [xEst_l, Pk_l, Xk_predict_l, lamuda_l] = fun_KF_residual(xEst_l, Pk_l, u, z_l, Q, R);
                         
                         % right
                         z_r = lane_right_measure_new;
-                        [xEst_r, Pk_r, Xk_predict_r, lamuda_r] = fun_KF_resdiual(xEst_r, Pk_r, u, z_r, Q, R);
+                        [xEst_r, Pk_r, Xk_predict_r, lamuda_r] = fun_KF_residual(xEst_r, Pk_r, u, z_r, Q, R);
                         
                         save_index = save_index + 1;
                         save_xk_l(:,save_index) = [image_timestamp - time_start; xEst_l];
